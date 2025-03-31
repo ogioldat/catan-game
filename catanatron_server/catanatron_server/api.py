@@ -1,36 +1,23 @@
 import json
-import logging
-import traceback
+# import logging
+# import traceback
 
 from flask import Response, Blueprint, jsonify, abort, request
 
 from catanatron_server.models import upsert_game_state, get_game_state
-from catanatron.json import GameEncoder, action_from_json
-from catanatron.models.player import Color, RandomPlayer
-from catanatron.game import Game
-from catanatron_experimental.machine_learning.players.value import ValueFunctionPlayer
-from catanatron_experimental.machine_learning.players.minimax import AlphaBetaPlayer
-from catanatron_experimental.analysis.mcts_analysis import GameAnalyzer
+from catanatron_core.catanatron import (
+    HumanPlayer,
+    Game,
+    Color,
+)
+from catanatron_core.catanatron.json import GameEncoder, action_from_json
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
 
-def player_factory(player_key):
-    if player_key[0] == "CATANATRON":
-        return AlphaBetaPlayer(player_key[1], 2, True)
-    elif player_key[0] == "RANDOM":
-        return RandomPlayer(player_key[1])
-    elif player_key[0] == "HUMAN":
-        return ValueFunctionPlayer(player_key[1], is_bot=False)
-    else:
-        raise ValueError("Invalid player key")
-
-
 @bp.route("/games", methods=("POST",))
 def post_game_endpoint():
-    player_keys = request.json["players"]
-    players = list(map(player_factory, zip(player_keys, Color)))
-
+    players = [HumanPlayer(color=Color.BLUE)]
     game = Game(players=players)
     upsert_game_state(game)
     return jsonify({"game_id": game.id})
@@ -78,69 +65,6 @@ def post_action_endpoint(game_id):
         status=200,
         mimetype="application/json",
     )
-
-
-@bp.route("/stress-test", methods=["GET"])
-def stress_test_endpoint():
-    players = [
-        AlphaBetaPlayer(Color.RED, 2, True),
-        AlphaBetaPlayer(Color.BLUE, 2, True),
-        AlphaBetaPlayer(Color.ORANGE, 2, True),
-        AlphaBetaPlayer(Color.WHITE, 2, True),
-    ]
-    game = Game(players=players)
-    game.play_tick()
-    return Response(
-        response=json.dumps(game, cls=GameEncoder),
-        status=200,
-        mimetype="application/json",
-    )
-
-
-@bp.route(
-    "/games/<string:game_id>/states/<string:state_index>/mcts-analysis", methods=["GET"]
-)
-def mcts_analysis_endpoint(game_id, state_index):
-    """Get MCTS analysis for specific game state."""
-    logging.info(f"MCTS analysis request for game {game_id} at state {state_index}")
-
-    try:
-        # Convert 'latest' to None for consistency with get_game_state
-        state_index = None if state_index == "latest" else int(state_index)
-
-        game = get_game_state(game_id, state_index)
-        if game is None:
-            logging.error(f"Game/state not found: {game_id}/{state_index}")
-            abort(404, description="Game state not found")
-
-        analyzer = GameAnalyzer(num_simulations=100)
-        probabilities = analyzer.analyze_win_probabilities(game)
-
-        logging.info(f"Analysis successful. Probabilities: {probabilities}")
-        return Response(
-            response=json.dumps(
-                {
-                    "success": True,
-                    "probabilities": probabilities,
-                    "state_index": state_index
-                    if state_index is not None
-                    else len(game.state.actions),
-                }
-            ),
-            status=200,
-            mimetype="application/json",
-        )
-
-    except Exception as e:
-        logging.error(f"Error in MCTS analysis endpoint: {str(e)}")
-        logging.error(traceback.format_exc())
-        return Response(
-            response=json.dumps(
-                {"success": False, "error": str(e), "trace": traceback.format_exc()}
-            ),
-            status=500,
-            mimetype="application/json",
-        )
 
 
 # ===== Debugging Routes
