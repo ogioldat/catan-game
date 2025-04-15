@@ -1,7 +1,4 @@
 import json
-# import logging
-# import traceback
-
 from flask import Response, Blueprint, jsonify, abort, request
 
 from catanatron_server.models import upsert_game_state, get_game_state
@@ -12,9 +9,21 @@ from catanatron.game import Game
 bp = Blueprint("api", __name__, url_prefix="/api")
 
 
+def player_factory(player_key):
+    if player_key[0] == "CATANATRON":
+        return RandomPlayer(player_key[1])
+    elif player_key[0] == "RANDOM":
+        return RandomPlayer(player_key[1])
+    elif player_key[0] == "HUMAN":
+        return RandomPlayer(player_key[1], is_bot=False)
+    else:
+        raise ValueError("Invalid player key")
+
+
 @bp.route("/games", methods=("POST",))
 def post_game_endpoint():
-    players = [HumanPlayer(color=Color.BLUE)]
+    player_keys = request.json["players"]
+    players = list(map(player_factory, zip(player_keys, Color)))
     game = Game(players=players)
     upsert_game_state(game)
     return jsonify({"game_id": game.id})
