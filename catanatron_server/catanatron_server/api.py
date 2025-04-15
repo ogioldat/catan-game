@@ -5,12 +5,9 @@ import json
 from flask import Response, Blueprint, jsonify, abort, request
 
 from catanatron_server.models import upsert_game_state, get_game_state
-from catanatron_core.catanatron import (
-    HumanPlayer,
-    Game,
-    Color,
-)
-from catanatron_core.catanatron.json import GameEncoder, action_from_json
+from catanatron.json import GameEncoder, action_from_json
+from catanatron.models.player import Color, RandomPlayer, HumanPlayer
+from catanatron.game import Game
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
