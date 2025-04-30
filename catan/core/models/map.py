@@ -4,8 +4,8 @@ import random
 from collections import Counter, defaultdict
 from typing import Dict, FrozenSet, List, Literal, Mapping, Set, Tuple, Type, Union
 
-from catanatron.models.coordinate_system import Direction, add, UNIT_VECTORS
-from catanatron.models.enums import (
+from catan.core.models.coordinate_system import Direction, add, UNIT_VECTORS
+from catan.core.models.enums import (
     FastResource,
     WOOD,
     BRICK,
@@ -71,41 +71,10 @@ class MapTemplate:
     ]
 
 
-# Small 7-tile map, no ports.
-MINI_MAP_TEMPLATE = MapTemplate(
-    [3, 4, 5, 6, 8, 9, 10],
-    [],
-    [WOOD, None, BRICK, SHEEP, WHEAT, WHEAT, ORE],
-    {
-        # center
-        (0, 0, 0): LandTile,
-        # first layer
-        (1, -1, 0): LandTile,
-        (0, -1, 1): LandTile,
-        (-1, 0, 1): LandTile,
-        (-1, 1, 0): LandTile,
-        (0, 1, -1): LandTile,
-        (1, 0, -1): LandTile,
-        # second layer
-        (2, -2, 0): Water,
-        (1, -2, 1): Water,
-        (0, -2, 2): Water,
-        (-1, -1, 2): Water,
-        (-2, 0, 2): Water,
-        (-2, 1, 1): Water,
-        (-2, 2, 0): Water,
-        (-1, 2, -1): Water,
-        (0, 2, -2): Water,
-        (1, 1, -2): Water,
-        (2, 0, -2): Water,
-        (2, -1, -1): Water,
-    },
-)
-
 """Standard 4-player map"""
 BASE_MAP_TEMPLATE = MapTemplate(
-    [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
-    [
+    numbers=[2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
+    port_resources=[
         # These are 2:1 ports
         WOOD,
         BRICK,
@@ -118,7 +87,7 @@ BASE_MAP_TEMPLATE = MapTemplate(
         None,
         None,
     ],
-    [
+    tile_resources=[
         # Four wood tiles
         WOOD,
         WOOD,
@@ -146,7 +115,7 @@ BASE_MAP_TEMPLATE = MapTemplate(
         None,
     ],
     # 3 layers, where last layer is water
-    {
+    topology={
         # center
         (0, 0, 0): LandTile,
         # first layer
@@ -248,7 +217,7 @@ class CatanMap:
 
 
 def init_port_nodes_cache(
-    tiles: Dict[Coordinate, Tile]
+    tiles: Dict[Coordinate, Tile],
 ) -> Dict[Union[FastResource, None], Set[int]]:
     """Initializes board.port_nodes cache.
 
@@ -271,7 +240,7 @@ def init_port_nodes_cache(
 
 
 def init_adjacent_tiles(
-    land_tiles: Dict[Coordinate, LandTile]
+    land_tiles: Dict[Coordinate, LandTile],
 ) -> Dict[int, List[LandTile]]:
     adjacent_tiles = defaultdict(list)  # node_id => tile[3]
     for tile in land_tiles.values():
@@ -281,7 +250,7 @@ def init_adjacent_tiles(
 
 
 def init_node_production(
-    adjacent_tiles: Dict[int, List[LandTile]]
+    adjacent_tiles: Dict[int, List[LandTile]],
 ) -> Dict[NodeId, Counter]:
     """Returns node_id => Counter({WHEAT: 0.123, ...})"""
     node_production = dict()
@@ -476,10 +445,10 @@ PORT_DIRECTION_TO_NODEREFS = {
     Direction.SOUTHWEST: (NodeRef.SOUTHWEST, NodeRef.SOUTH),
 }
 
-TOURNAMENT_MAP_TILES = initialize_tiles(
-    BASE_MAP_TEMPLATE,
-    [10, 8, 3, 6, 2, 5, 10, 8, 4, 11, 12, 9, 5, 4, 9, 11, 3, 6],
-    [
+DEFAULT_MAP_TILES = initialize_tiles(
+    map_template=BASE_MAP_TEMPLATE,
+    shuffled_numbers_param=[10, 8, 3, 6, 2, 5, 10, 8, 4, 11, 12, 9, 5, 4, 9, 11, 3, 6],
+    shuffled_port_resources_param=[
         None,
         SHEEP,
         None,
@@ -490,7 +459,7 @@ TOURNAMENT_MAP_TILES = initialize_tiles(
         BRICK,
         None,
     ],
-    [
+    shuffled_tile_resources_param=[
         None,
         WOOD,
         SHEEP,
@@ -513,13 +482,11 @@ TOURNAMENT_MAP_TILES = initialize_tiles(
         None,
     ],
 )
-TOURNAMENT_MAP = CatanMap.from_tiles(TOURNAMENT_MAP_TILES)
+DEFAULT_MAP = CatanMap.from_tiles(DEFAULT_MAP_TILES)
 
 
-def build_map(map_type: Literal["BASE", "TOURNAMENT", "MINI"]):
+def build_map(map_type: Literal["BASE", "TOURNAMENT"]):
     if map_type == "TOURNAMENT":
-        return TOURNAMENT_MAP  # this assumes map is read-only data struct
-    elif map_type == "MINI":
-        return CatanMap.from_template(MINI_MAP_TEMPLATE)
+        return DEFAULT_MAP
     else:
         return CatanMap.from_template(BASE_MAP_TEMPLATE)

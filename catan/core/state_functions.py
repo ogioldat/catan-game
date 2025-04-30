@@ -3,11 +3,12 @@ Functions that mutate the given state accordingly. Core of game logic.
 Some are helpers to _read_ information from state and keep the rest
 of the code decoupled from state representation.
 """
+
 import random
 from typing import Optional
 
-from catanatron.models.decks import ROAD_COST_FREQDECK, freqdeck_add
-from catanatron.models.enums import (
+from catan.core.models.decks import ROAD_COST_FREQDECK, freqdeck_add
+from catan.core.models.enums import (
     VICTORY_POINT,
     WOOD,
     BRICK,

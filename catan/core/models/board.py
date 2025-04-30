@@ -6,20 +6,19 @@ import functools
 
 import networkx as nx  # type: ignore
 
-from catanatron.models.player import Color
-from catanatron.models.map import (
+from catan.core.models.player import Color
+from catan.core.models.map import (
     BASE_MAP_TEMPLATE,
-    MINI_MAP_TEMPLATE,
     NUM_NODES,
     CatanMap,
     NodeId,
 )
-from catanatron.models.enums import FastBuildingType, SETTLEMENT, CITY
+from catan.core.models.enums import FastBuildingType, SETTLEMENT, CITY
 
 
 # Used to find relationships between nodes and edges
 base_map = CatanMap.from_template(BASE_MAP_TEMPLATE)
-mini_map = CatanMap.from_template(MINI_MAP_TEMPLATE)
+
 STATIC_GRAPH = nx.Graph()
 for tile in base_map.tiles.values():
     STATIC_GRAPH.add_nodes_from(tile.nodes.values())

@@ -5,11 +5,11 @@ Classes to encode/decode catanatron classes to JSON format.
 import json
 from enum import Enum
 
-from catanatron.models.map import Water, Port, LandTile
-from catanatron.game import Game
-from catanatron.models.player import Color
-from catanatron.models.enums import RESOURCES, Action, ActionType
-from catanatron.state_functions import get_longest_road_length
+from catan.core.models.map import Water, Port, LandTile
+from catan.core.game import Game
+from catan.core.models.player import Color
+from catan.core.models.enums import RESOURCES, Action, ActionType
+from catan.core.state_functions import get_longest_road_length
 
 
 def longest_roads_by_player(state):

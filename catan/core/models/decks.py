@@ -3,9 +3,10 @@
 We use a histogram / 'frequency list' to represent decks (aliased 'freqdeck').
 This representation is concise, easy to copy, access and fast to compare.
 """
+
 from typing import Iterable, List
 
-from catanatron.models.enums import (
+from catan.core.models.enums import (
     KNIGHT,
     MONOPOLY,
     ROAD_BUILDING,

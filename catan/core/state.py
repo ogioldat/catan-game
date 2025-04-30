@@ -7,9 +7,9 @@ import pickle
 from collections import defaultdict
 from typing import Any, List, Tuple, Dict, Iterable
 
-from catanatron.models.map import BASE_MAP_TEMPLATE, CatanMap
-from catanatron.models.board import Board
-from catanatron.models.enums import (
+from catan.core.models.map import BASE_MAP_TEMPLATE, CatanMap
+from catan.core.models.board import Board
+from catan.core.models.enums import (
     DEVELOPMENT_CARDS,
     MONOPOLY,
     RESOURCES,
@@ -20,7 +20,7 @@ from catanatron.models.enums import (
     ActionPrompt,
     ActionType,
 )
-from catanatron.models.decks import (
+from catan.core.models.decks import (
     CITY_COST_FREQDECK,
     DEVELOPMENT_CARD_COST_FREQDECK,
     SETTLEMENT_COST_FREQDECK,
@@ -35,11 +35,11 @@ from catanatron.models.decks import (
     starting_devcard_bank,
     starting_resource_bank,
 )
-from catanatron.models.actions import (
+from catan.core.models.actions import (
     generate_playable_actions,
     road_building_possibilities,
 )
-from catanatron.state_functions import (
+from catan.core.state_functions import (
     build_city,
     build_road,
     build_settlement,
@@ -59,8 +59,8 @@ from catanatron.state_functions import (
     player_num_resource_cards,
     player_resource_freqdeck_contains,
 )
-from catanatron.models.player import Color, Player
-from catanatron.models.enums import FastResource
+from catan.core.models.player import Color, Player
+from catan.core.models.enums import FastResource
 
 # These will be prefixed by P0_, P1_, ...
 # Create Player State blueprint

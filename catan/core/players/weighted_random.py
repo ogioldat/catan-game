@@ -1,7 +1,7 @@
 import random
 
-from catanatron.models.player import Player
-from catanatron.models.actions import ActionType
+from catan.core.models.player import Player
+from catan.core.models.actions import ActionType
 
 
 WEIGHTS_BY_ACTION_TYPE = {

@@ -1,12 +1,13 @@
 """
-Move-generation functions (these return a list of actions that can be taken 
+Move-generation functions (these return a list of actions that can be taken
 by current player). Main function is generate_playable_actions.
 """
+
 import operator as op
 from functools import reduce
 from typing import Any, Dict, List, Set, Tuple, Union
 
-from catanatron.models.decks import (
+from catan.core.models.decks import (
     CITY_COST_FREQDECK,
     ROAD_COST_FREQDECK,
     SETTLEMENT_COST_FREQDECK,
@@ -15,7 +16,7 @@ from catanatron.models.decks import (
     freqdeck_count,
     freqdeck_from_listdeck,
 )
-from catanatron.models.enums import (
+from catan.core.models.enums import (
     RESOURCES,
     Action,
     ActionPrompt,
@@ -28,7 +29,7 @@ from catanatron.models.enums import (
     WHEAT,
     WOOD,
 )
-from catanatron.state_functions import (
+from catan.core.state_functions import (
     get_player_buildings,
     get_player_freqdeck,
     player_can_afford_dev_card,

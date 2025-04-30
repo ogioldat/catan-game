@@ -7,11 +7,11 @@ import random
 import sys
 from typing import List, Union, Optional
 
-from catanatron.models.enums import Action, ActionPrompt, ActionType
-from catanatron.state import State, apply_action
-from catanatron.state_functions import player_key, player_has_rolled
-from catanatron.models.map import CatanMap
-from catanatron.models.player import Color, Player
+from catan.core.models.enums import Action, ActionPrompt, ActionType
+from catan.core.state import State, apply_action
+from catan.core.state_functions import player_key, player_has_rolled
+from catan.core.models.map import CatanMap
+from catan.core.models.player import Color, Player
 
 # To timeout RandomRobots from getting stuck...
 TURNS_LIMIT = 1000
@@ -44,39 +44,6 @@ def is_valid_trade(action_value):
         if i > 0 and j > 0:
             return False  # cant trade same resources
     return True
-
-
-class GameAccumulator:
-    """Interface to hook into different game lifecycle events.
-
-    Useful to compute aggregate statistics, log information, etc...
-    """
-
-    def __init__(*args, **kwargs):
-        pass
-
-    def before(self, game):
-        """
-        Called when the game is created, no actions have
-        been taken by players yet, but the board is decided.
-        """
-        pass
-
-    def step(self, game_before_action, action):
-        """
-        Called after each action taken by a player.
-        Game should be right before action is taken.
-        """
-        pass
-
-    def after(self, game):
-        """
-        Called when the game is finished.
-
-        Check game.winning_color() to see if the game
-        actually finished or exceeded turn limit (is None).
-        """
-        pass
 
 
 class Game:
@@ -113,28 +80,21 @@ class Game:
             self.vps_to_win = vps_to_win
             self.state = State(players, catan_map, discard_limit=discard_limit)
 
-    def play(self, accumulators=[], decide_fn=None):
+    def play(self, decide_fn=None):
         """Executes game until a player wins or exceeded TURNS_LIMIT.
 
         Args:
-            accumulators (list[Accumulator], optional): list of Accumulator classes to use.
-                Their .consume method will be called with every action, and
-                their .finalize method will be called when the game ends (if it ends)
-                Defaults to [].
             decide_fn (function, optional): Function to overwrite current player's decision with.
                 Defaults to None.
         Returns:
             Color: winning color or None if game exceeded TURNS_LIMIT
         """
-        for accumulator in accumulators:
-            accumulator.before(self)
         while self.winning_color() is None and self.state.num_turns < TURNS_LIMIT:
-            self.play_tick(decide_fn=decide_fn, accumulators=accumulators)
-        for accumulator in accumulators:
-            accumulator.after(self)
+            self.play_tick(decide_fn=decide_fn)
+
         return self.winning_color()
 
-    def play_tick(self, decide_fn=None, accumulators=[]):
+    def play_tick(self, decide_fn=None):
         """Advances game by one ply (player decision).
 
         Args:
@@ -152,10 +112,7 @@ class Game:
             if decide_fn is not None
             else player.decide(self, actions)
         )
-        # Call accumulator.step here, because we want game_before_action, action
-        if len(accumulators) > 0:
-            for accumulator in accumulators:
-                accumulator.step(self, action)
+
         return self.execute(action)
 
     def execute(self, action: Action, validate_action: bool = True) -> Action:

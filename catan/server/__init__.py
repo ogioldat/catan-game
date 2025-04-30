@@ -22,14 +22,12 @@ def create_app(test_config=None):
     if test_config is not None:
         app.config.update(test_config)
 
-    # ===== Initialize Database
-    from catanatron_server.models import db
+    from catan.server.models import db
 
     with app.app_context():
         db.init_app(app)
         db.create_all()
 
-    # ===== Initialize Routes
     from . import api
 
     app.register_blueprint(api.bp)
