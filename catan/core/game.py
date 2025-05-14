@@ -4,7 +4,7 @@ Contains Game class which is a thin-wrapper around the State class.
 
 import uuid
 import random
-import sys
+import pickle
 from typing import List, Union, Optional
 
 from catan.core.models.enums import Action, ActionPrompt, ActionType
@@ -56,7 +56,7 @@ class Game:
     def __init__(
         self,
         players: List[Player],
-        seed: Optional[int] = None,
+        seed: int = None,
         discard_limit: int = 7,
         vps_to_win: int = 10,
         catan_map: Optional[CatanMap] = None,
@@ -73,12 +73,20 @@ class Game:
             initialize (bool, optional): Whether to initialize. Defaults to True.
         """
         if initialize:
-            self.seed = seed if seed is not None else random.randrange(sys.maxsize)
+            self.seed = seed
+
             random.seed(self.seed)
 
-            self.id = str(uuid.uuid4())
+            self.id = str(uuid.UUID(version=4, int=seed))
+
+            if self.seed is None:
+                self.id = str(uuid.uuid4())
+
             self.vps_to_win = vps_to_win
             self.state = State(players, catan_map, discard_limit=discard_limit)
+
+    def finished(self):
+        return not (self.winning_color() is None and self.state.num_turns < TURNS_LIMIT)
 
     def play(self, decide_fn=None):
         """Executes game until a player wins or exceeded TURNS_LIMIT.
@@ -89,7 +97,7 @@ class Game:
         Returns:
             Color: winning color or None if game exceeded TURNS_LIMIT
         """
-        while self.winning_color() is None and self.state.num_turns < TURNS_LIMIT:
+        while not self.finished():
             self.play_tick(decide_fn=decide_fn)
 
         return self.winning_color()
@@ -154,3 +162,6 @@ class Game:
         game_copy.vps_to_win = self.vps_to_win
         game_copy.state = self.state.copy()
         return game_copy
+
+    def __hash__(self) -> int:
+        return hash(pickle.dumps(self))
