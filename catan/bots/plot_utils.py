@@ -1,0 +1,78 @@
+from collections import defaultdict
+from typing import List
+import matplotlib.pyplot as plt
+import numpy as np
+
+from catan.core.models.enums import Action, ActionType
+from catan.core.models.player import Color
+
+
+def plot_action_freqs(actions: List[Action], exclusions: List[ActionType] = []):
+    player_action_counts = defaultdict(lambda: defaultdict(int))
+    all_action_types = set()
+    all_players = set()
+
+    for action in actions:
+        player, action_type, _ = action
+
+        if action_type in exclusions:
+            continue
+
+        player_action_counts[player][action_type] += 1
+        all_action_types.add(action_type)
+        all_players.add(player)
+
+    n_action_types = len(all_action_types)
+    n_players = len(all_players)
+
+    player_plot_data = {}
+    for player in all_players:
+        player_plot_data[player] = [
+            player_action_counts[player].get(action_type, 0)
+            for action_type in all_action_types
+        ]
+
+    player_bar_colors = {
+        Color.RED: "red",
+        Color.BLUE: "blue",
+        Color.ORANGE: "orange",
+        Color.WHITE: "lightgray",  # Example, if 'WHITE' player exists
+    }
+
+    # Plotting
+    x_indices = np.arange(n_action_types)  # the label locations for action types
+    bar_width = (
+        0.8 / n_players
+    )  # the width of the bars, adjusted for the number of players
+
+    fig, ax = plt.subplots(figsize=(8, 6))  # Adjust figure size for better readability
+
+    for i, player in enumerate(all_players):
+        # Calculate the offset for each player's bars within a group
+        offset = (i - (n_players - 1) / 2) * bar_width
+        counts = player_plot_data[player]
+
+        bar_color = player_bar_colors.get(player, None)
+
+        rects = ax.bar(
+            x_indices + offset,
+            counts,
+            bar_width,
+            label=player,
+            color=bar_color,
+            alpha=0.7,
+        )
+        ax.bar_label(rects, padding=3)
+
+    # Add labels, title, and legend
+    ax.set_ylabel("Frequency of Actions")
+    ax.set_xlabel("Type of Action")
+    ax.set_title("Action Frequencies per Player")
+    ax.set_xticks(x_indices)
+    ax.set_xticklabels(
+        all_action_types, rotation=45, ha="right"
+    )  # Rotate labels if they overlap
+    ax.legend(title="Player")
+    fig.tight_layout()
+
+    return fig, ax
