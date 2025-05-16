@@ -15,6 +15,19 @@
 - [ ] Game UI
   - [ ] Show agentic playouts visible in UI
 
+### Open questions
+
+- Temporal Difference over Monte Carlo methods?
+- What is the action space?
+- How should we architect the neural network?
+- Which RL algo should we use?
+- On-policy vs Off-policy methods?
+- When (if so) can we utilize self-play?
+- NN
+  - Input features for NN?
+  - How to model randomness?
+  - Is RNN suitable?
+
 ## Core game logic credit
 
 This repo uses `catanator`'s modules for catan core game logic
