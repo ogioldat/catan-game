@@ -15,6 +15,10 @@
 - [ ] Game UI
   - [ ] Show agentic playouts visible in UI
 
+### Resources
+
+- <https://github.com/higgsfield/RL-Adventure/tree/master>
+
 ### Open questions
 
 - Temporal Difference over Monte Carlo methods?
@@ -27,6 +31,8 @@
   - Input features for NN?
   - How to model randomness?
   - Is RNN suitable?
+  - How to model agent strategies?
+  - How to model dueling?
 
 ## Core game logic credit
 
