@@ -321,7 +321,11 @@ class MCTSCatanGameState:
             self.game = game
 
     def get_current_player(self) -> int:
-        return self.game.state.current_player()
+        player = self.game.state.current_player()
+        if player.color == Color.BLUE:
+            return PLAYER_ONE
+        else:
+            return PLAYER_TWO
 
     def get_possible_actions(self) -> List[CatanAction]:
         return self.game.state.playable_actions
@@ -334,47 +338,6 @@ class MCTSCatanGameState:
             players=next_game.state.players, game=next_game, seed=self.seed
         )
 
-    def _check_winner(self) -> Optional[int]:
-        if self._winner is not None:  # Use cached winner
-            return self._winner
-
-        # Check rows
-        for r in range(3):
-            if (
-                self.board[r][0] != 0
-                and self.board[r][0] == self.board[r][1] == self.board[r][2]
-            ):
-                self._winner = self.board[r][0]
-                return self._winner
-        # Check columns
-        for c in range(3):
-            if (
-                self.board[0][c] != 0
-                and self.board[0][c] == self.board[1][c] == self.board[2][c]
-            ):
-                self._winner = self.board[0][c]
-                return self._winner
-        # Check diagonals
-        if (
-            self.board[0][0] != 0
-            and self.board[0][0] == self.board[1][1] == self.board[2][2]
-        ):
-            self._winner = self.board[0][0]
-            return self._winner
-        if (
-            self.board[0][2] != 0
-            and self.board[0][2] == self.board[1][1] == self.board[2][0]
-        ):
-            self._winner = self.board[0][2]
-            return self._winner
-
-        # Check for draw (no empty cells left and no winner)
-        if not any(0 in row for row in self.board):
-            self._winner = 0  # Draw
-            return self._winner
-
-        return None  # No winner yet, game not over or not a draw
-
     def is_terminal(self) -> bool:
         return self.game.finished()
 
@@ -382,11 +345,11 @@ class MCTSCatanGameState:
         winner = self.game.winning_color()
 
         if winner == self.game.state.players[0].color:
-            return 1.0
+            return PLAYER_ONE
         elif winner == self.game.state.players[1].color:
-            return -1.0
+            return PLAYER_TWO
         elif winner is None:
-            return 0.0
+            return 0
         else:
             raise RuntimeError("get_game_result called on a non-terminal state.")
 

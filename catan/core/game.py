@@ -77,10 +77,10 @@ class Game:
 
             random.seed(self.seed)
 
-            self.id = str(uuid.UUID(version=4, int=seed))
-
             if self.seed is None:
                 self.id = str(uuid.uuid4())
+            else:
+                self.id = str(uuid.UUID(version=4, int=seed))
 
             self.vps_to_win = vps_to_win
             self.state = State(players, catan_map, discard_limit=discard_limit)
