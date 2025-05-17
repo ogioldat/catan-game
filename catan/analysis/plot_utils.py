@@ -3,8 +3,10 @@ from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 
+from catan.bots.mcts_bot import MCTSBot
+from catan.core.game import Game
 from catan.core.models.enums import Action, ActionType
-from catan.core.models.player import Color
+from catan.core.models.player import Color, RandomPlayer
 
 
 def plot_action_freqs(actions: List[Action], exclusions: List[ActionType] = []):
@@ -76,3 +78,31 @@ def plot_action_freqs(actions: List[Action], exclusions: List[ActionType] = []):
     fig.tight_layout()
 
     return fig, ax
+
+
+def plot_mcts_n_sim_win_rate(
+    mcts_color: Color = Color.BLUE,
+    sim_range=np.arange(2, 12, 4),
+    games_per_sim=5,
+):
+    n_playouts = len(sim_range)
+    mcts_win_rates = np.zeros(n_playouts)
+
+    for idx, n_sim in enumerate(sim_range):
+        mcts_playout_wins = 0
+        for _ in range(games_per_sim):
+            game = Game(
+                players=[
+                    RandomPlayer(color=Color.RED, is_bot=True),
+                    MCTSBot(color=Color.BLUE, n_simulations=n_sim),
+                ]
+            )
+            winner_color = game.play()
+
+            if winner_color == mcts_color:
+                mcts_playout_wins += 1
+
+        mcts_win_rates[idx] = mcts_playout_wins / games_per_sim
+
+    plt.scatter(sim_range, mcts_win_rates)
+    plt.show()
