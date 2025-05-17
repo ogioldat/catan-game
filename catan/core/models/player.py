@@ -1,6 +1,8 @@
 import random
 from enum import Enum
 
+from catan.core.game import Game
+
 
 class Color(Enum):
     """Enum to represent the colors in the game"""
@@ -29,7 +31,7 @@ class Player:
         self.color = color
         self.is_bot = is_bot
 
-    def decide(self, game, playable_actions):
+    def decide(self, game: Game, playable_actions):
         """Should return one of the playable_actions or
         an OFFER_TRADE action if its your turn and you have already rolled.
 

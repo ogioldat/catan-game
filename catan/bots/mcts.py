@@ -2,14 +2,6 @@ import math
 import random
 from typing import List, Optional
 
-if __name__ == "__main__":
-    import sys
-    import os
-
-    project_root = os.path.abspath("../..")
-    if project_root not in sys.path:
-        sys.path.insert(0, project_root)
-
 from catan.core.game import Game as CatanGame
 from catan.core.models.enums import Action
 from catan.core.models.player import Color, Player, RandomPlayer
@@ -34,9 +26,9 @@ class MCTSNode:
         self.children: List["MCTSNode"] = []
         self.wins = 0
         self.visits = 0
-        self.untried_actions = self.game.state.playable_actions.copy()
+        self.untried_actions = self.game.state.playable_actions.copy()[0:5]
 
-    def ucb1_score(self, exploration_const=1.41):
+    def ucb1_score(self, exploration_const=1.4):
         if self.visits == 0:
             return float("inf")
 
@@ -78,7 +70,7 @@ class MCTSNode:
         return child_node
 
     def simulate(self) -> Color:
-        return self.game.play(decide_fn=random_decide)
+        return self.game.copy().play(decide_fn=random_decide)
 
     def backpropagate(self, reward):
         self.visits += 1
