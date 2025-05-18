@@ -4,11 +4,11 @@ from collections import defaultdict
 from typing import Any, Set, Dict, Tuple, List
 import functools
 
-import networkx as nx  # type: ignore
+import networkx as nx
 
 from catan.core.models.player import Color
 from catan.core.models.map import (
-    BASE_MAP_TEMPLATE,
+    DEFAULT_MAP,
     NUM_NODES,
     CatanMap,
     NodeId,
@@ -16,11 +16,8 @@ from catan.core.models.map import (
 from catan.core.models.enums import FastBuildingType, SETTLEMENT, CITY
 
 
-# Used to find relationships between nodes and edges
-base_map = CatanMap.from_template(BASE_MAP_TEMPLATE)
-
 STATIC_GRAPH = nx.Graph()
-for tile in base_map.tiles.values():
+for tile in DEFAULT_MAP.tiles.values():
     STATIC_GRAPH.add_nodes_from(tile.nodes.values())
     STATIC_GRAPH.add_edges_from(tile.edges.values())
 
@@ -58,8 +55,8 @@ class Board:
         self.buildable_edges_cache = {}
         self.player_port_resources_cache = {}
         if initialize:
-            self.map: CatanMap = catan_map or CatanMap.from_template(
-                BASE_MAP_TEMPLATE
+            self.map: CatanMap = (
+                catan_map or DEFAULT_MAP
             )  # Static State (no need to copy)
 
             self.buildings: Dict[NodeId, Tuple[Color, FastBuildingType]] = dict()

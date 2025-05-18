@@ -3,9 +3,10 @@ from typing import Literal
 from flask import Response, Blueprint, jsonify, abort, request
 
 from catan.bots.mcts_bot import MCTSBot
+from catan.core.models.map import DEFAULT_MAP
 from catan.server.models import upsert_game_state, get_game_state
 from catan.core.json import GameEncoder, action_from_json
-from catan.core.models.player import Color, RandomPlayer, HumanPlayer
+from catan.core.models.player import Color, RandomPlayer
 from catan.core.game import Game
 
 bp = Blueprint("api", __name__, url_prefix="/api")
@@ -28,7 +29,7 @@ def post_game_endpoint():
     player_keys = request.json["players"]
     players = player_factory(player_keys)
 
-    game = Game(players=players)
+    game = Game(players=players, catan_map=DEFAULT_MAP)
 
     upsert_game_state(game)
     return jsonify({"game_id": game.id})

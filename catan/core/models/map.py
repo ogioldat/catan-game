@@ -483,10 +483,3 @@ DEFAULT_MAP_TILES = initialize_tiles(
     ],
 )
 DEFAULT_MAP = CatanMap.from_tiles(DEFAULT_MAP_TILES)
-
-
-def build_map(map_type: Literal["BASE", "TOURNAMENT"]):
-    if map_type == "TOURNAMENT":
-        return DEFAULT_MAP
-    else:
-        return CatanMap.from_template(BASE_MAP_TEMPLATE)
