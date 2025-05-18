@@ -1,7 +1,6 @@
 import React from "react";
 import { isPlayersTurn } from "../utils/stateUtils";
 
-import "./Prompt.scss";
 
 function findTileByCoordinate(gameState, coordinate) {
   for (const tile of Object.values(gameState.tiles)) {
@@ -120,5 +119,14 @@ export default function Prompt({ gameState, isBotThinking }) {
   } else {
     // prompt = humanizeAction(gameState.actions[gameState.actions.length - 1], gameState.bot_colors);
   }
-  return <div className="prompt">{prompt}</div>;
+  const clrsMap = {
+    BLUE: '#2b6ed9',
+    RED: '#c83d3a',
+    ORANGE: '#ffa500',
+    WHITE: 'white'
+  }
+
+  return <div className="prompt">Game finished!
+    <p>{gameState.winning_color}</p> is a winner!
+  </div>;
 }

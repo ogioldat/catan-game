@@ -5,12 +5,10 @@ import Loader from "react-loader-spinner";
 import { useSnackbar } from "notistack";
 
 import ZoomableBoard from "./ZoomableBoard";
-import ActionsToolbar from "./ActionsToolbar";
 
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import "./GameScreen.scss";
 import LeftDrawer from "../components/LeftDrawer";
-import RightDrawer from "../components/RightDrawer";
 import { store } from "../store";
 import ACTIONS from "../actions";
 import { getState, postAction } from "../utils/apiClient";
@@ -23,7 +21,6 @@ function GameScreen({ replayMode }) {
   const { gameId, stateIndex } = useParams();
   const { state, dispatch } = useContext(store);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const [isBotThinking, setIsBotThinking] = useState(false);
 
   // Load game state
   useEffect(() => {
@@ -48,13 +45,11 @@ function GameScreen({ replayMode }) {
     ) {
       // Make bot click next action.
       (async () => {
-        setIsBotThinking(true);
         const start = new Date();
         const gameState = await postAction(gameId);
         const requestTime = new Date() - start;
         setTimeout(() => {
           // simulate thinking
-          setIsBotThinking(false);
           dispatch({ type: ACTIONS.SET_GAME_STATE, data: gameState });
           if (getHumanColor(gameState)) {
             dispatchSnackbar(enqueueSnackbar, closeSnackbar, gameState);
@@ -85,13 +80,44 @@ function GameScreen({ replayMode }) {
     );
   }
 
+  const clrsMap = {
+    BLUE: '#2b6ed9',
+    RED: '#c83d3a',
+    ORANGE: '#ffa500',
+    WHITE: 'white'
+  }
+
+
   return (
     <main>
-      <h1 className="logo">Catanatron</h1>
+        <h1 className="logo">
+          {
+            state.gameState.players.map((plr, idx) => 
+              <span 
+                style={{color: clrsMap[plr.color]}} 
+                key={plr.color}>
+                  
+                  <span style={{color: "black"}}>
+                  { idx > 0 ? " vs " : ""}
+                  </span>
+                  
+                  {plr.kind}
+              </span>
+            )
+          }
+        </h1>
+
+      <div style={{margin: "0 auto", fontSize: 25 }}>
+        {
+            state.gameState.winning_color &&
+            <span style={{fontWeight:"bold", color: clrsMap[state.gameState.players.find(p => p.color == state.gameState.winning_color).color]}}>
+              {state.gameState.players.find(p => p.color == state.gameState.winning_color).kind}  
+            </span> 
+          } wins 👑
+      </div>
+
       <ZoomableBoard replayMode={replayMode} />
-      <ActionsToolbar isBotThinking={isBotThinking} replayMode={replayMode} />
       <LeftDrawer />
-      <RightDrawer />
     </main>
   );
 }

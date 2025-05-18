@@ -1,8 +1,5 @@
 @import "../variables.scss";
 
-.MuiToolbar-root {
-  background: $black;
-}
 
 h6.MuiTypography-h6 {
   font-family: "Bungee Inline", sans-serif;
@@ -44,12 +41,9 @@ h6.MuiTypography-h6 {
 
 main {
   .logo {
-    margin: 5px 20px 0 20px;
     text-align: center;
   }
 
-  background: $black;
-  color: white;
   height: 100%;
   display: flex;
   flex-direction: column;

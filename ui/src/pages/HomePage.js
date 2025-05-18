@@ -6,25 +6,17 @@ import { createGame } from "../utils/apiClient";
 
 import "./HomePage.scss";
 
-// Enum of Type of Game Mode
 const GameMode = Object.freeze({
-  HUMAN_VS_CATANATRON: "HUMAN_VS_CATANATRON",
-  RANDOM_BOTS: "RANDOM_BOTS",
-  CATANATRON_BOTS: "CATANATRON_BOTS",
+  RANDOM_VS_RANDOM: "RANDOM_VS_RANDOM",
+  MCTS_VS_RANDOM: "MCTS_VS_RANDOM",
 });
 
 function getPlayers(gameMode, numPlayers) {
   switch (gameMode) {
-    case GameMode.HUMAN_VS_CATANATRON:
-      const players = ["HUMAN"];
-      for (let i = 1; i < numPlayers; i++) {
-        players.push("CATANATRON");
-      }
-      return players;
-    case GameMode.RANDOM_BOTS:
-      return Array(numPlayers).fill("RANDOM");
-    case GameMode.CATANATRON_BOTS:
-      return Array(numPlayers).fill("CATANATRON");
+    case GameMode.RANDOM_VS_RANDOM:
+      return ["RANDOM", "RANDOM"];
+    case GameMode.MCTS_VS_RANDOM:
+      return ["MCTS", "RANDOM"];
     default:
       throw new Error("Invalid Game Mode");
   }
@@ -45,52 +37,25 @@ export default function HomePage() {
 
   return (
     <div className="home-page">
-      <h1 className="logo">Catanatron</h1>
+      <h1 className="logo">The Settlers of Catan</h1>
+      <h2>Multi-Agent Playout</h2>
 
       <div className="switchable">
         {!loading ? (
           <>
-            <ul>
-              <li>OPEN HAND</li>
-              <li>NO CHOICE DURING DISCARD</li>
-            </ul>
-            <div className="player-count-selector">
-              <div className="player-count-label">Number of Players</div>
-              <div className="player-count-buttons">
-                {[2, 3, 4].map((value) => (
-                  <Button
-                    key={value}
-                    variant="contained"
-                    onClick={() => setNumPlayers(value)}
-                    className={`player-count-button ${
-                      numPlayers === value ? "selected" : ""
-                    }`}
-                  >
-                    {value} Players
-                  </Button>
-                ))}
-              </div>
-            </div>
             <Button
               variant="contained"
               color="primary"
-              onClick={() => handleCreateGame(GameMode.HUMAN_VS_CATANATRON)}
+              onClick={() => handleCreateGame(GameMode.RANDOM_VS_RANDOM)}
             >
-              Play against Catanatron
+              Random vs Random
             </Button>
             <Button
               variant="contained"
-              color="secondary"
-              onClick={() => handleCreateGame(GameMode.RANDOM_BOTS)}
+              color="primary"
+              onClick={() => handleCreateGame(GameMode.MCTS_VS_RANDOM)}
             >
-              Watch Random Bots
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => handleCreateGame(GameMode.CATANATRON_BOTS)}
-            >
-              Watch Catanatron
+              MCTS vs Random
             </Button>
           </>
         ) : (

@@ -100,6 +100,10 @@ class GameEncoder(json.JSONEncoder):
                 "current_playable_actions": obj.state.playable_actions,
                 "longest_roads_by_player": longest_roads_by_player(obj.state),
                 "winning_color": obj.winning_color(),
+                "players": [
+                    {"color": plr.color.value, "kind": plr.__class__.__name__}
+                    for plr in obj.state.players
+                ],
             }
         if isinstance(obj, Water):
             return {"type": "WATER"}

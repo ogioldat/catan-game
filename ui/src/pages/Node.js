@@ -5,7 +5,11 @@ import { tilePixelVector, getNodeDelta, SQRT3 } from "../utils/coordinates";
 
 function Building({ building, color }) {
   const type = building === "CITY" ? "city" : "settlement";
-  return <div className={cn(color, type)}></div>;
+  return <div className={cn(color, type)}>
+    {
+      type == "city" ? "C" : "S"
+    }
+  </div>;
 }
 
 export default function Node({

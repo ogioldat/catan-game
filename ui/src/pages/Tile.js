@@ -1,6 +1,6 @@
 import React from "react";
 import cn from "classnames";
-import Paper from "@material-ui/core/Paper";
+import Box from "@material-ui/core/Box";
 
 import "./Tile.scss";
 import brickTile from "../assets/tile_brick.svg";
@@ -9,21 +9,21 @@ import grainTile from "../assets/tile_wheat.svg";
 import lumberTile from "../assets/tile_wood.svg";
 import oreTile from "../assets/tile_ore.svg";
 import woolTile from "../assets/tile_sheep.svg";
-import maritimeTile from "../assets/tile_maritime.svg";
+import portTile from "../assets/port.svg";
 import { SQRT3, tilePixelVector } from "../utils/coordinates";
 
 export function NumberToken({ className, children, style, size, flashing }) {
   return (
-    <Paper
+    <Box
       elevation={3}
       className={cn("number-token", className, {flashing: flashing })}
       style={{
-        "--base-size": `${size}px`, // this var can be overrided via `style` prop
+        "--base-size": `${size}px`,
         ...style,
       }}
     >
       {children}
-    </Paper>
+    </Box>
   );
 }
 
@@ -62,6 +62,9 @@ export default function Tile({ center, coordinate, tile, size, onClick, flashing
       <NumberToken 
         size={size}
         flashing={flashing}
+        style={{
+          "color": [6,8].includes(tile.number) ? "red" : "black"
+        }}
       >
         <div>{tile.number}</div>
         <div className="pips">{numberToPips(tile.number)}</div>
@@ -104,7 +107,7 @@ export default function Tile({ center, coordinate, tile, size, onClick, flashing
           style={{
             left: x,
             top: y,
-            backgroundImage: `url('${maritimeTile}')`,
+            backgroundImage: `url('${portTile}')`,
             height: 60,
             backgroundSize: "contain",
             width: 52,

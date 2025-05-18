@@ -1,6 +1,8 @@
 import json
+from typing import Literal
 from flask import Response, Blueprint, jsonify, abort, request
 
+from catan.bots.mcts_bot import MCTSBot
 from catan.server.models import upsert_game_state, get_game_state
 from catan.core.json import GameEncoder, action_from_json
 from catan.core.models.player import Color, RandomPlayer, HumanPlayer
@@ -9,22 +11,25 @@ from catan.core.game import Game
 bp = Blueprint("api", __name__, url_prefix="/api")
 
 
-def player_factory(player_key):
-    if player_key[0] == "CATANATRON":
-        return RandomPlayer(player_key[1])
-    elif player_key[0] == "RANDOM":
-        return RandomPlayer(player_key[1])
-    elif player_key[0] == "HUMAN":
-        return RandomPlayer(player_key[1], is_bot=False)
-    else:
-        raise ValueError("Invalid player key")
+def player_factory(player_keys: Literal["MCTS", "RANDOM"]):
+    players = []
+    for player, color in zip(player_keys, Color):
+        if player == "MCTS":
+            players.append(MCTSBot(color=color, n_simulations=5))
+
+        if player == "RANDOM":
+            players.append(RandomPlayer(color=color))
+
+    return players
 
 
 @bp.route("/games", methods=("POST",))
 def post_game_endpoint():
     player_keys = request.json["players"]
-    players = list(map(player_factory, zip(player_keys, Color)))
+    players = player_factory(player_keys)
+
     game = Game(players=players)
+
     upsert_game_state(game)
     return jsonify({"game_id": game.id})
 
@@ -56,7 +61,6 @@ def post_action_endpoint(game_id):
             mimetype="application/json",
         )
 
-    # TODO: remove `or body_is_empty` when fully implement actions in FE
     body_is_empty = (not request.data) or request.json is None
     if game.state.current_player().is_bot or body_is_empty:
         game.play_tick()

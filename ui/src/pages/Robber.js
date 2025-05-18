@@ -2,6 +2,7 @@ import React from "react";
 
 import { NumberToken } from "./Tile";
 import { SQRT3, tilePixelVector } from "../utils/coordinates";
+import robberImg from '../assets/robber.jpg'
 
 export default function Robber({ center, size, coordinate }) {
   const [centerX, centerY] = center;
@@ -18,9 +19,11 @@ export default function Robber({ center, size, coordinate }) {
       style={{
         left: x,
         top: y,
+        backgroundImage: `url('${robberImg}')`,
+        backgroundSize: "contain",
+        backgroundRepeat: "no-repeat",
+        filter: "invert(1)"
       }}
-    >
-      R
-    </NumberToken>
+    />
   );
 }
