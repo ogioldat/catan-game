@@ -34,11 +34,11 @@ class MCTSBot(Player):
             return ff_action
 
         mcts_root = mcts.MCTSNode(game=game.copy(), color=self.color)
+        mcts_root.run_playouts(n_simulations=self.n_simulations)
 
         if self.debug_cb:
             self.debug_cb(mcts_root)
 
-        mcts_root.run_playouts(n_simulations=self.n_simulations)
         best_action = mcts_root.find_best_action()
 
         if self.debug:

@@ -1,10 +1,8 @@
 import math
 import random
-from typing import Any, Callable, List, Optional
+from typing import List, Optional
 
-from catan.core.game import Game as CatanGame
 from catan.core.models.enums import Action, ActionType
-from catan.core.models.player import Color
 
 
 def best_settlement_build_actions(game, possible_actions: List[Action]):
@@ -16,14 +14,17 @@ def best_settlement_build_actions(game, possible_actions: List[Action]):
     )
 
     if len(possible_3_yield_tiles) != 0:
-        return possible_3_yield_tiles
+        return possible_3_yield_tiles[0:5]
 
     yield_2_tiles = [n[0] for n in filter(lambda x: len(x[1]) > 1, prods)]
     possible_2_yield_tiles = list(
         filter(lambda action: action.value in yield_2_tiles, possible_actions)
     )
 
-    return possible_2_yield_tiles
+    if len(possible_2_yield_tiles) != 0:
+        return possible_2_yield_tiles[0:5]
+
+    return possible_actions
 
 
 def random_decide(_, game, playable_actions):
@@ -35,6 +36,10 @@ def actions_heuristic(game, actions: List[Action]) -> List[Action]:
 
     if ActionType.BUILD_SETTLEMENT in action_types:
         return best_settlement_build_actions(game, possible_actions=actions)
+
+    # Move robber to the place the worst for the opponents
+    if ActionType.MOVE_ROBBER in action_types:
+        pass
 
     return actions
 
@@ -134,5 +139,6 @@ class MCTSNode:
             node.backpropagate(reward)
 
     def find_best_action(self):
+        # print(self.children)
         best_child = max(self.children, key=lambda child: child.visits)
         return best_child.action
