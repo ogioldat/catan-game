@@ -1,5 +1,6 @@
 from typing import Optional
 
+
 from catan.bots.mcts import MCTSNode
 from catan.core.models.player import Color
 
@@ -32,7 +33,7 @@ def _get_action_string(action_obj: Optional[object]) -> str:
 
 
 def _print_mcts_node_recursive(
-    node: MCTSNode,
+    node: "MCTSNode",
     prefix: str,
     is_last_child: bool,
     max_depth: Optional[int],
@@ -56,7 +57,7 @@ def _print_mcts_node_recursive(
     action_str = _get_action_string(node.action)
 
     ucb_score_val = node.ucb1_score()  # Assumes MCTSNode has this method
-    ucb_score_str = ucb_score_val
+    ucb_score_str = round(ucb_score_val, 4)
 
     # Wins/visits are from the perspective of mcts_agent_color
     mcts_agent_color_name = getattr(mcts_agent_color, "name", str(mcts_agent_color))
@@ -83,9 +84,9 @@ def _print_mcts_node_recursive(
     # Check if it's a leaf in the MCTS tree (no children explored yet or fully expanded without children)
     elif not node.children:
         if node.is_fully_expanded():  # Assumes MCTSNode has this method
-            line += " (Leaf - Fully Expanded)"
+            line += " (Leaf - Max Exp)"
         else:
-            line += " (Leaf - Not Fully Expanded)"
+            line += " (Leaf - Not Max Exp)"
 
     print(line)
 
@@ -115,7 +116,7 @@ def _print_mcts_node_recursive(
         )
 
 
-def pretty_print_mcts_tree(root_node: MCTSNode, max_depth: Optional[int] = 3):
+def pretty_print_mcts_tree(root_node: "MCTSNode", max_depth: Optional[int] = 3):
     """
     Pretty prints the MCTS tree starting from the given root_node.
     root_node: The root MCTSNode of the tree to print.

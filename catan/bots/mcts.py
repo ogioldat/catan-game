@@ -1,23 +1,51 @@
 import math
 import random
-from typing import List, Optional
+from typing import Any, Callable, List, Optional
 
 from catan.core.game import Game as CatanGame
-from catan.core.models.enums import Action
-from catan.core.models.player import Color, Player, RandomPlayer
+from catan.core.models.enums import Action, ActionType
+from catan.core.models.player import Color
+
+
+def best_settlement_build_actions(game, possible_actions: List[Action]):
+    prods = game.state.board.map.node_production.items()
+
+    yield_3_tiles = [n[0] for n in filter(lambda x: len(x[1]) > 2, prods)]
+    possible_3_yield_tiles = list(
+        filter(lambda action: action.value in yield_3_tiles, possible_actions)
+    )
+
+    if len(possible_3_yield_tiles) != 0:
+        return possible_3_yield_tiles
+
+    yield_2_tiles = [n[0] for n in filter(lambda x: len(x[1]) > 1, prods)]
+    possible_2_yield_tiles = list(
+        filter(lambda action: action.value in yield_2_tiles, possible_actions)
+    )
+
+    return possible_2_yield_tiles
 
 
 def random_decide(_, game, playable_actions):
     return random.choice(playable_actions)
 
 
+def actions_heuristic(game, actions: List[Action]) -> List[Action]:
+    action_types = map(lambda a: a.action_type, actions)
+
+    if ActionType.BUILD_SETTLEMENT in action_types:
+        return best_settlement_build_actions(game, possible_actions=actions)
+
+    return actions
+
+
 class MCTSNode:
     def __init__(
         self,
-        game: CatanGame,
-        color: Color,
+        game,
+        color,
         parent: Optional["MCTSNode"] = None,
-        action: Optional[Action] = None,
+        action=None,
     ):
         self.game = game
         self.parent = parent
@@ -26,7 +54,11 @@ class MCTSNode:
         self.children: List["MCTSNode"] = []
         self.wins = 0
         self.visits = 0
-        self.untried_actions = self.game.state.playable_actions.copy()[0:5]
+        self.untried_actions = self.game.state.playable_actions.copy()
+
+        self.untried_actions = actions_heuristic(
+            game=self.game, actions=self.untried_actions
+        )
 
     def ucb1_score(self, exploration_const=1.4):
         if self.visits == 0:
@@ -69,7 +101,7 @@ class MCTSNode:
 
         return child_node
 
-    def simulate(self) -> Color:
+    def simulate(self):
         return self.game.copy().play(decide_fn=random_decide)
 
     def backpropagate(self, reward):
@@ -101,9 +133,6 @@ class MCTSNode:
 
             node.backpropagate(reward)
 
-        if not self.children:
-            raise RuntimeError("MCTS root node is empty!")
-
-    def find_best_action(self) -> Action:
+    def find_best_action(self):
         best_child = max(self.children, key=lambda child: child.visits)
         return best_child.action
