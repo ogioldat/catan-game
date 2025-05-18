@@ -9,7 +9,7 @@ from catan.core.models.enums import Action, ActionType
 from catan.core.models.player import Color, RandomPlayer
 
 
-def plot_action_freqs(actions: List[Action], exclusions: List[ActionType] = []):
+def plot_action_freqs(actions: List[Action], exclusions: List[str] = []):
     player_action_counts = defaultdict(lambda: defaultdict(int))
     all_action_types = set()
     all_players = set()
@@ -17,11 +17,11 @@ def plot_action_freqs(actions: List[Action], exclusions: List[ActionType] = []):
     for action in actions:
         player, action_type, _ = action
 
-        if action_type in exclusions:
+        if action_type.name in exclusions:
             continue
 
-        player_action_counts[player][action_type] += 1
-        all_action_types.add(action_type)
+        player_action_counts[player][action_type.name] += 1
+        all_action_types.add(action_type.name)
         all_players.add(player)
 
     n_action_types = len(all_action_types)

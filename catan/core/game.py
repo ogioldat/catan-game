@@ -18,32 +18,7 @@ TURNS_LIMIT = 1000
 
 
 def is_valid_action(state, action):
-    """True if its a valid action right now. An action is valid
-    if its in playable_actions or if its a OFFER_TRADE in the right time."""
-    if action.action_type == ActionType.OFFER_TRADE:
-        return (
-            state.current_color() == action.color
-            and state.current_prompt == ActionPrompt.PLAY_TURN
-            and player_has_rolled(state, action.color)
-            and is_valid_trade(action.value)
-        )
-
     return action in state.playable_actions
-
-
-def is_valid_trade(action_value):
-    """Checks the value of a OFFER_TRADE does not
-    give away resources or trade matching resources.
-    """
-    offering = action_value[:5]
-    asking = action_value[5:]
-    if sum(offering) == 0 or sum(asking) == 0:
-        return False  # cant give away cards
-
-    for i, j in zip(offering, asking):
-        if i > 0 and j > 0:
-            return False  # cant trade same resources
-    return True
 
 
 class Game:
