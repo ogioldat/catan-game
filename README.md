@@ -1,5 +1,16 @@
 # Catan Game
 
+## Running the game
+
+1. Setup venv or conda env.
+2. Install deps `pip install -r requirements.txt`
+3. Active dev dirs
+   - `/catan/bots` -- create new AI bots,
+   - `/catan/analysis` -- analyze playout stats and bot strategies.
+4. Preview playouts in UI
+   - Run script `run_server`
+   - Run script `run_ui`
+
 ## Development plan
 
 - [ ] AI player agents
