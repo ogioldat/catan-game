@@ -71,7 +71,5 @@ class HumanPlayer(Player):
 
 
 class RandomPlayer(Player):
-    """Random AI player that selects an action randomly from the list of playable_actions"""
-
     def decide(self, game, playable_actions):
         return random.choice(playable_actions)
