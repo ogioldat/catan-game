@@ -2,7 +2,9 @@ import math
 import random
 from typing import List, Optional
 
+from catan.core.game import Game
 from catan.core.models.enums import Action, ActionType
+from catan.core.models.player import Color
 
 
 def best_settlement_build_actions(game, possible_actions: List[Action]):
@@ -31,7 +33,39 @@ def random_decide(_, game, playable_actions):
     return random.choice(playable_actions)
 
 
-def actions_heuristic(game, actions: List[Action]) -> List[Action]:
+def best_robber_actions(
+    game: Game, player_color: Color, playable_actions: List[Action], n=5
+):
+    opponent_colors = [p.color for p in game.state.players if p.color != player_color]
+
+    opponent_building_nodes = []
+
+    for op_color in opponent_colors:
+        opponent_buildings = game.state.buildings_by_color[op_color]
+        opponent_building_nodes += (
+            opponent_buildings["SETTLEMENT"] + opponent_buildings["CITY"]
+        )
+
+    print(opponent_building_nodes)
+
+    def buildings_on_tile(entry):
+        coords, tile = entry
+        tile_nodes = set(tile.nodes.values())
+
+        return len(tile_nodes.intersection(set(opponent_building_nodes)))
+
+    tiles = game.state.board.map.land_tiles.copy().items()
+    optimal_tiles = sorted(tiles, key=buildings_on_tile, reverse=True)
+
+    optimal_tiles_coords = list(map(lambda a: a[0], optimal_tiles[0:n]))
+
+    def is_optimal_action(action):
+        return action.value[0] in optimal_tiles_coords
+
+    return list(filter(is_optimal_action, playable_actions))
+
+
+def actions_heuristic(game, actions: List[Action], trade_eps=0.1) -> List[Action]:
     action_types = map(lambda a: a.action_type, actions)
 
     if ActionType.BUILD_SETTLEMENT in action_types:
@@ -39,7 +73,13 @@ def actions_heuristic(game, actions: List[Action]) -> List[Action]:
 
     # Move robber to the place the worst for the opponents
     if ActionType.MOVE_ROBBER in action_types:
-        pass
+        return best_robber_actions(game, Color.BLUE, n=2)
+
+    if ActionType.MARITIME_TRADE in action_types:
+        if random.random() > trade_eps:
+            return list(
+                filter(lambda a: a.action_type != ActionType.MARITIME_TRADE, actions)
+            )
 
     return actions
 
