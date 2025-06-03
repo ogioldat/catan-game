@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, List
 from pprint import pprint
 
 from catan.core.game import Game
@@ -20,7 +20,7 @@ class PlayerStats:
     n_cities: int
 
 
-def player_stats(game: Game):
+def player_stats(game: Game) -> List[PlayerStats]:
     stats = []
     for idx, player in enumerate(game.state.players):
         color = player.color

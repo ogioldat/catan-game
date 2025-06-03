@@ -123,7 +123,7 @@ export default function Prompt({ gameState, isBotThinking }) {
     BLUE: '#2b6ed9',
     RED: '#c83d3a',
     ORANGE: '#ffa500',
-    WHITE: 'white'
+    VIOLET: '#8F00FF'
   }
 
   return <div className="prompt">Game finished!

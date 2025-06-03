@@ -84,7 +84,7 @@ function GameScreen({ replayMode }) {
     BLUE: '#2b6ed9',
     RED: '#c83d3a',
     ORANGE: '#ffa500',
-    WHITE: 'white'
+    VIOLET: '#8F00FF'
   }
 
 

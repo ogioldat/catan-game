@@ -9,8 +9,8 @@
 .ORANGE {
   background: $orange;
 }
-.WHITE {
-  background: $white;
+.VIOLET {
+  background: $violet;
 }
 .RED.foreground {
   color: $red;
@@ -24,8 +24,8 @@
   color: $orange;
   background: #00000000;
 }
-.WHITE.foreground {
-  color: white;
+.VIOLET.foreground {
+  color: $violet;
   background: #00000000;
 }
 

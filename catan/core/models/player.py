@@ -8,7 +8,7 @@ class Color(Enum):
     RED = "RED"
     BLUE = "BLUE"
     ORANGE = "ORANGE"
-    WHITE = "WHITE"
+    VIOLET = "VIOLET"
 
 
 class Player:

@@ -16,7 +16,7 @@ def player_factory(player_keys: Literal["MCTS", "RANDOM"]):
     players = []
     for player, color in zip(player_keys, Color):
         if player == "MCTS":
-            players.append(MCTSBot(color=color, n_simulations=20))
+            players.append(MCTSBot(color=color, n_simulations=30))
 
         if player == "RANDOM":
             players.append(RandomPlayer(color=color))
@@ -29,7 +29,7 @@ def post_game_endpoint():
     player_keys = request.json["players"]
     players = player_factory(player_keys)
 
-    game = Game(vps_to_win=6, players=players, catan_map=DEFAULT_MAP)
+    game = Game(vps_to_win=10, players=players, catan_map=DEFAULT_MAP)
 
     upsert_game_state(game)
     return jsonify({"game_id": game.id})

@@ -41,7 +41,7 @@ def plot_action_freqs(actions: List[Action], exclusions: List[str] = []):
         Color.RED: "red",
         Color.BLUE: "blue",
         Color.ORANGE: "orange",
-        Color.WHITE: "lightgray",  # Example, if 'WHITE' player exists
+        Color.VIOLET: "violet",
     }
 
     # Plotting
@@ -117,6 +117,7 @@ def get_mcts_sims_stats(roots: List[MCTSNode], keys=None, kind="visit"):
 
     for sim_idx, sim_stats in enumerate(stats):
         record = {"SIM_NUM": sim_idx + 1}
+        not_empty = False
         for action_type, (visits, reward) in sim_stats.items():
             if keys and action_type not in keys:
                 continue
@@ -125,6 +126,11 @@ def get_mcts_sims_stats(roots: List[MCTSNode], keys=None, kind="visit"):
                 record[action_type.value] = visits
             else:
                 record[action_type.value] = reward
-        data_for_df.append(record)
+
+            if visits > 0:
+                not_empty = True
+
+        if not_empty:
+            data_for_df.append(record)
 
     return pd.DataFrame(data_for_df)
