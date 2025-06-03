@@ -1,6 +1,10 @@
+from collections import defaultdict
+from enum import Enum
 import math
 import random
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
 
 from catan.core.game import Game
 from catan.core.models.enums import Action, ActionType
@@ -27,10 +31,6 @@ def best_settlement_build_actions(game, possible_actions: List[Action]):
         return possible_2_yield_tiles[0:5]
 
     return possible_actions
-
-
-def random_decide(_, game, playable_actions):
-    return random.choice(playable_actions)
 
 
 def best_robber_actions(
@@ -76,12 +76,66 @@ def actions_heuristic(game, actions: List[Action], trade_eps=0.1) -> List[Action
         return best_robber_actions(game, Color.BLUE, n=2)
 
     if ActionType.MARITIME_TRADE in action_types:
-        if random.random() > trade_eps:
+        if random.random() < trade_eps:
             return list(
                 filter(lambda a: a.action_type != ActionType.MARITIME_TRADE, actions)
             )
 
     return actions
+
+
+# class CatanRewards(Enum):
+#      = 10
+#     BUILT_CITY = 15
+#     OWNS_LONGEST_ROAD_TITLE = 20
+#     OWNS_LARGEST_ARMY_TITLE = 20
+#     OWNS_DEV_CARD_VP = 10
+
+#     # Activities leading to future rewards
+#     BUILT_ROAD = 1
+#     BOUGHT_DEV_CARD = 1
+#     ACTIVATED_PORT = 3
+#     MOVE_ROBBER = 0.1
+
+#     # Penalties
+#     LOST_LONGEST_ROAD_TITLE = -30
+#     LOST_LARGEST_ARMY_TITLE = -30
+#     END_TURN = -0.2
+
+catan_rewards = defaultdict(
+    lambda: 1,
+    {
+        ActionType.BUILD_CITY: 20,
+        ActionType.BUILD_SETTLEMENT: 20,
+        ActionType.BUILD_ROAD: 2,
+        ActionType.BUY_DEVELOPMENT_CARD: 2,
+        ActionType.MARITIME_TRADE: 0.01,
+        ActionType.MOVE_ROBBER: 0.01,
+    },
+)
+
+
+def random_decide(player, game, playable_actions):
+    return random.choice(playable_actions)
+
+
+def weighted_decide(player, game, playable_actions: List[Action]):
+    weights = []
+    action_indices = []
+
+    for idx, action in enumerate(playable_actions):
+        reward = catan_rewards[action.action_type]
+        weights.append(reward)
+        action_indices.append(idx)
+
+    total_weight = sum(weights)
+    probabilities = [w / total_weight for w in weights]
+
+    rand_idx = np.random.choice(action_indices, p=probabilities)
+
+    # print(playable_actions[rand_idx], "Dupa")
+
+    return playable_actions[rand_idx]
 
 
 class MCTSNode:
@@ -94,10 +148,10 @@ class MCTSNode:
     ):
         self.game = game
         self.parent = parent
-        self.action = action
+        self.action: Action = action
         self.color = color
         self.children: List["MCTSNode"] = []
-        self.wins = 0
+        self.reward = 0
         self.visits = 0
         self.untried_actions = self.game.state.playable_actions.copy()
 
@@ -110,7 +164,7 @@ class MCTSNode:
             return float("inf")
 
         # UCB1 = (wins / visits) + C * sqrt(log(parent_visits) / visits)
-        exploitation_term = self.wins / self.visits
+        exploitation_term = self.reward / self.visits
         exploration_term = exploration_const * math.sqrt(
             math.log(self.parent.visits) / self.visits
         )
@@ -147,11 +201,11 @@ class MCTSNode:
         return child_node
 
     def simulate(self):
-        return self.game.copy().play(decide_fn=random_decide)
+        return self.game.copy().play(decide_fn=weighted_decide)
 
     def backpropagate(self, reward):
         self.visits += 1
-        self.wins += reward
+        self.reward += reward
 
         if self.parent:
             self.parent.backpropagate(reward)
@@ -175,10 +229,29 @@ class MCTSNode:
 
             if winner_color == self.color:
                 reward = 1
+                # reward = map_action_to_reward(node.action)
 
             node.backpropagate(reward)
 
     def find_best_action(self):
-        # print(self.children)
         best_child = max(self.children, key=lambda child: child.visits)
         return best_child.action
+
+    def get_action_stats_recursive(self, stats: Dict[str, Tuple[int, float]]):
+        for child in self.children:
+            if child.action is not None:
+                action_type = child.action.action_type
+
+                current_visits, current_reward = stats.get(action_type, (0, 0.0))
+
+                stats[action_type] = (
+                    current_visits + child.visits,
+                    current_reward + child.reward,
+                )
+
+            child.get_action_stats_recursive(stats)
+
+    def get_action_stats(self) -> Dict[str, Tuple[int, float]]:
+        all_action_type_stats: Dict[str, Tuple[int, float]] = {}
+        self.get_action_stats_recursive(all_action_type_stats)
+        return all_action_type_stats

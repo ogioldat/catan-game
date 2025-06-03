@@ -29,7 +29,7 @@ def post_game_endpoint():
     player_keys = request.json["players"]
     players = player_factory(player_keys)
 
-    game = Game(players=players, catan_map=DEFAULT_MAP)
+    game = Game(vps_to_win=6, players=players, catan_map=DEFAULT_MAP)
 
     upsert_game_state(game)
     return jsonify({"game_id": game.id})

@@ -1,8 +1,11 @@
 from collections import defaultdict
-from typing import List
+from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 
+from catan.bots.mcts import MCTSNode
 from catan.bots.mcts_bot import MCTSBot
 from catan.core.game import Game
 from catan.core.models.enums import Action, ActionType
@@ -106,3 +109,22 @@ def plot_mcts_n_sim_win_rate(
 
     plt.scatter(sim_range, mcts_win_rates)
     plt.show()
+
+
+def get_mcts_sims_stats(roots: List[MCTSNode], keys=None, kind="visit"):
+    data_for_df = []
+    stats = map(lambda r: r.get_action_stats(), roots)
+
+    for sim_idx, sim_stats in enumerate(stats):
+        record = {"SIM_NUM": sim_idx + 1}
+        for action_type, (visits, reward) in sim_stats.items():
+            if keys and action_type not in keys:
+                continue
+
+            if kind == "visit":
+                record[action_type.value] = visits
+            else:
+                record[action_type.value] = reward
+        data_for_df.append(record)
+
+    return pd.DataFrame(data_for_df)

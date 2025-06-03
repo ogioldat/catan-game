@@ -61,7 +61,7 @@ def _print_mcts_node_recursive(
 
     # Wins/visits are from the perspective of mcts_agent_color
     mcts_agent_color_name = getattr(mcts_agent_color, "name", str(mcts_agent_color))
-    line += f"Act: {action_str} [W/V: {node.wins}/{node.visits} for P({mcts_agent_color_name}), UCB1: {ucb_score_str}]"
+    line += f"Act: {action_str} [W/V: {node.reward}/{node.visits} for P({mcts_agent_color_name}), UCB1: {ucb_score_str}]"
 
     # Current player in the game state of *this* node
     current_turn_player_name = "N/A"
@@ -135,7 +135,7 @@ def pretty_print_mcts_tree(root_node: "MCTSNode", max_depth: Optional[int] = 3):
 
     # Print information for the root node
     root_info = f"MCTS Root (P({mcts_agent_color_name}) perspective) "
-    root_info += f"[Total W/V: {root_node.wins}/{root_node.visits}]"
+    root_info += f"[Total W/V: {root_node.reward}/{root_node.visits}]"
 
     # The root_node itself doesn't have an action that *led* to it from a parent in this context,
     # but if it's a subtree, node.action might be set.
