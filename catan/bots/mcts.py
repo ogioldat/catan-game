@@ -29,10 +29,23 @@ def map_action_to_reward(action: Action, game: Game, color: Color) -> int:
         num_roads = len(buildings.get("ROAD")) if buildings.get("ROAD") else 0.1
         num_cities = len(buildings.get("CITY")) if buildings.get("CITY") else 0.1
         num_settlements = (
-            len(buildings.get("SETTLEMENT")) if buildings.get("CITY") else 0.1
+            len(buildings.get("SETTLEMENT")) if buildings.get("SETTLEMENT") else 0.1
         )
 
         return num_roads / (num_cities + num_settlements)
+
+    # if action.action_type == ActionType.BUILD_SETTLEMENT:
+    #     buildings = game.state.buildings_by_color[color]
+    #     num_settlements = (
+    #         len(buildings.get("SETTLEMENT")) if buildings.get("SETTLEMENT") else 0.1
+    #     )
+
+    #     if num_settlements <= 2:
+    #         return catan_weights[ActionType.BUILD_SETTLEMENT]
+
+    #     discount_factor = 0.95 * (num_settlements - 1)
+
+    #     return catan_weights[ActionType.BUILD_SETTLEMENT] * discount_factor
 
     return catan_weights[action.action_type]
 

@@ -41,7 +41,7 @@ def plot_action_freqs(actions: List[Action], exclusions: List[str] = []):
         Color.RED: "red",
         Color.BLUE: "blue",
         Color.ORANGE: "orange",
-        Color.VIOLET: "violet",
+        Color.VIOLET: "purple",
     }
 
     # Plotting

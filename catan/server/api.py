@@ -16,7 +16,7 @@ def player_factory(player_keys: Literal["MCTS", "RANDOM"]):
     players = []
     for player, color in zip(player_keys, Color):
         if player == "MCTS":
-            players.append(MCTSBot(color=color, n_simulations=30))
+            players.append(MCTSBot(color=color, n_simulations=50))
 
         if player == "RANDOM":
             players.append(RandomPlayer(color=color))

@@ -44,6 +44,10 @@ def yield_n_and_with_resource(
     return filter_fn
 
 
+def sort_by_yield_chance(action: Action, game: Game):
+    return sum(game.state.board.map.node_production[action.value].values())
+
+
 def best_settlement_build_actions(
     game: Game, possible_actions: List[Action], player_color: Color
 ):
@@ -63,18 +67,24 @@ def best_settlement_build_actions(
     possible_3_yield_nodes = list(
         filter(lambda action: action.value in yield_3_nodes, possible_actions)
     )
+    possible_3_yield_nodes = sorted(
+        possible_3_yield_nodes, key=lambda n: sort_by_yield_chance(n, game)
+    )
 
     if len(possible_3_yield_nodes) != 0:
-        return possible_3_yield_nodes[0:5]
+        return possible_3_yield_nodes[0:4]
 
     filter_2 = yield_n_and_with_resource(game, 2, needed_resource)
     yield_2_nodes = [n[0] for n in filter(filter_2, prods)]
     possible_2_yield_nodes = list(
         filter(lambda action: action.value in yield_2_nodes, possible_actions)
     )
+    possible_2_yield_nodes = sorted(
+        possible_2_yield_nodes, key=lambda n: sort_by_yield_chance(n, game)
+    )
 
     if len(possible_2_yield_nodes) != 0:
-        return possible_2_yield_nodes[0:5]
+        return possible_2_yield_nodes[0:4]
 
     return possible_actions
 
