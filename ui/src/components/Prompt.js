@@ -25,7 +25,7 @@ function getShortTileString(tileTile) {
 
 export function humanizeAction(gameState, action) {
   const botColors = gameState.bot_colors;
-  const player = botColors.includes(action[0]) ? "BOT" : "YOU";
+  const player = botColors.includes(action[0]) ? "" : "";
   switch (action[1]) {
     case "ROLL":
       return `${player} ROLLED A ${action[2][0] + action[2][1]}`;

@@ -10,20 +10,19 @@ from catan.core.game import Game
 from catan.core.models.enums import Action, ActionType
 from catan.core.models.player import Color
 
-
-catan_weights = defaultdict(
-    lambda: 1,
-    {
-        ActionType.BUILD_CITY: 20,
-        ActionType.BUILD_SETTLEMENT: 30,
-        ActionType.BUILD_ROAD: 5,
-        ActionType.BUY_DEVELOPMENT_CARD: 2,
-        ActionType.MARITIME_TRADE: 0.02,
-    },
-)
+DEFAULT_REWARDS_MAP = {
+    ActionType.BUILD_CITY: 40,
+    ActionType.BUILD_SETTLEMENT: 50,
+    ActionType.BUILD_ROAD: 5,
+    ActionType.BUY_DEVELOPMENT_CARD: 0.5,
+    ActionType.MARITIME_TRADE: 0.02,
+    ActionType.PLAY_KNIGHT_CARD: 0.5,
+}
 
 
-def map_action_to_reward(action: Action, game: Game, color: Color) -> int:
+def map_action_to_reward(
+    action: Action, game: Game, color: Color, catan_weights
+) -> int:
     if action.action_type == ActionType.BUILD_ROAD:
         buildings = game.state.buildings_by_color[color]
         num_roads = len(buildings.get("ROAD")) if buildings.get("ROAD") else 0.1
@@ -34,41 +33,7 @@ def map_action_to_reward(action: Action, game: Game, color: Color) -> int:
 
         return num_roads / (num_cities + num_settlements)
 
-    # if action.action_type == ActionType.BUILD_SETTLEMENT:
-    #     buildings = game.state.buildings_by_color[color]
-    #     num_settlements = (
-    #         len(buildings.get("SETTLEMENT")) if buildings.get("SETTLEMENT") else 0.1
-    #     )
-
-    #     if num_settlements <= 2:
-    #         return catan_weights[ActionType.BUILD_SETTLEMENT]
-
-    #     discount_factor = 0.95 * (num_settlements - 1)
-
-    #     return catan_weights[ActionType.BUILD_SETTLEMENT] * discount_factor
-
     return catan_weights[action.action_type]
-
-
-def random_decide(player, game, playable_actions):
-    return random.choice(playable_actions)
-
-
-def weighted_decide(player, game, playable_actions: List[Action]):
-    weights = []
-    action_indices = []
-
-    for idx, action in enumerate(playable_actions):
-        reward = catan_weights[action.action_type]
-        weights.append(reward)
-        action_indices.append(idx)
-
-    total_weight = sum(weights)
-    probabilities = [w / total_weight for w in weights]
-
-    rand_idx = np.random.choice(action_indices, p=probabilities)
-
-    return playable_actions[rand_idx]
 
 
 class MCTSNode:
@@ -78,6 +43,7 @@ class MCTSNode:
         color,
         parent: Optional["MCTSNode"] = None,
         action=None,
+        rewards_map=DEFAULT_REWARDS_MAP,
     ):
         self.game: Game = game
         self.parent = parent
@@ -87,6 +53,10 @@ class MCTSNode:
         self.reward = 0
         self.visits = 0
         self.untried_actions = self.game.state.playable_actions.copy()
+        self.catan_weights = defaultdict(
+            lambda: 1,
+            rewards_map,
+        )
 
         self.untried_actions = actions_heuristic(
             game=self.game, actions=self.untried_actions, player_color=self.color
@@ -134,8 +104,24 @@ class MCTSNode:
 
         return child_node
 
+    def weighted_decide(self, player, game, playable_actions: List[Action]):
+        weights = []
+        action_indices = []
+
+        for idx, action in enumerate(playable_actions):
+            reward = self.catan_weights[action.action_type]
+            weights.append(reward)
+            action_indices.append(idx)
+
+        total_weight = sum(weights)
+        probabilities = [w / total_weight for w in weights]
+
+        rand_idx = np.random.choice(action_indices, p=probabilities)
+
+        return playable_actions[rand_idx]
+
     def simulate(self):
-        return self.game.copy().play(decide_fn=weighted_decide)
+        return self.game.copy().play(decide_fn=self.weighted_decide)
 
     def backpropagate(self, reward):
         self.visits += 1
@@ -164,7 +150,7 @@ class MCTSNode:
             if self.current_color == self.color and winner_color == self.color:
                 reward = 1
                 node.reward += map_action_to_reward(
-                    node.action, self.game, self.current_color
+                    node.action, self.game, self.current_color, self.catan_weights
                 )
 
             node.backpropagate(reward)

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { useState, useContext } from "react";
 import cn from "classnames";
 import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
 import Divider from "@material-ui/core/Divider";
@@ -13,7 +13,7 @@ import { playerKey } from "../utils/stateUtils";
 
 import "./LeftDrawer.scss";
 
-function DrawerContent({ gameState }) {
+function PlayersInfo({ gameState }) {
   const playerSections = gameState.colors.map((color) => {
     const key = playerKey(gameState, color);
     return (
@@ -31,72 +31,39 @@ function DrawerContent({ gameState }) {
   return (
     <>
       {playerSections}
-      <div className="log">
-        {gameState.actions
-          .slice()
-          .reverse()
-          .map((action, i) => (
-            <div key={i} className={cn("action foreground", action[0])}>
-              {humanizeAction(gameState, action)}
-            </div>
-          ))}
-      </div>
     </>
   );
 }
 
 export default function LeftDrawer() {
   const { state, dispatch } = useContext(store);
-  const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-  const openLeftDrawer = useCallback(
-    (event) => {
-      if (
-        event &&
-        event.type === "keydown" &&
-        (event.key === "Tab" || event.key === "Shift")
-      ) {
-        return;
-      }
-
-      dispatch({ type: ACTIONS.SET_LEFT_DRAWER_OPENED, data: true });
-    },
-    [dispatch]
-  );
-  const closeLeftDrawer = useCallback(
-    (event) => {
-      if (
-        event &&
-        event.type === "keydown" &&
-        (event.key === "Tab" || event.key === "Shift")
-      ) {
-        return;
-      }
-
-      dispatch({ type: ACTIONS.SET_LEFT_DRAWER_OPENED, data: false });
-    },
-    [dispatch]
-  );
 
   return (
     <>
-      <Hidden mdUp implementation="js">
-        <SwipeableDrawer
-          className="left-drawer"
-          anchor="left"
-          open={state.isLeftDrawerOpen}
-          onClose={closeLeftDrawer}
-          onOpen={openLeftDrawer}
-          disableBackdropTransition={!iOS}
-          disableDiscovery={iOS}
-          onKeyDown={closeLeftDrawer}
-        >
-          <DrawerContent gameState={state.gameState} />
-        </SwipeableDrawer>
-      </Hidden>
-      <Hidden smDown implementation="css">
+      <Hidden implementation="css">
         <Drawer className="left-drawer" anchor="left" variant="permanent" open>
-          <DrawerContent gameState={state.gameState} />
+          <PlayersInfo gameState={state.gameState} />
+        </Drawer>
+      </Hidden>
+
+      <Hidden implementation="css">
+        <Drawer className="left-drawer" anchor="right" variant="permanent" open>
+        <h2>Event Log</h2>
+        <div className="log">
+          {state.gameState.actions
+            .reverse()
+            .map((action, i) =>  {
+              return (
+                <>
+                  <div key={i} style={{fontWeight: "bold"}} className={cn("action foreground", action[0])}>
+                    {humanizeAction(state.gameState, action)}
+                  </div>
+  
+                </>
+                )
+              }
+            )}
+        </div>
         </Drawer>
       </Hidden>
     </>
