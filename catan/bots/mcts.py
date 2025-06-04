@@ -11,8 +11,8 @@ from catan.core.models.enums import Action, ActionType
 from catan.core.models.player import Color
 
 DEFAULT_REWARDS_MAP = {
-    ActionType.BUILD_CITY: 40,
-    ActionType.BUILD_SETTLEMENT: 50,
+    ActionType.BUILD_CITY: 10,
+    ActionType.BUILD_SETTLEMENT: 20,
     ActionType.BUILD_ROAD: 5,
     ActionType.BUY_DEVELOPMENT_CARD: 0.5,
     ActionType.MARITIME_TRADE: 0.02,

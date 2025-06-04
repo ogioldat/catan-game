@@ -71,7 +71,7 @@ function GameScreen({ replayMode }) {
       <main>
         <Loader
           className="loader"
-          type="Grid"
+          type="Oval"
           color="#000000"
           height={100}
           width={100}
